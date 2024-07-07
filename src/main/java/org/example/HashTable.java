@@ -2,7 +2,7 @@ package org.example;
 
 import java.util.LinkedList;
 
-class HashTable<Key, Value> {
+public class HashTable<Key, Value> {
     private static class Node<Key, Value> {
         Key key;
         Value value;
@@ -52,15 +52,16 @@ class HashTable<Key, Value> {
         return null;
     }
 
-    public void remove(Key key) {
+    public boolean remove(Key key) {
         int index = hash(key);
         LinkedList<Node<Key, Value>> bucket = table[index];
         for (Node<Key, Value> node : bucket) {
             if (key.equals(node.key)) {
                 bucket.remove(node);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public static void main(String[] args) {
