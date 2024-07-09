@@ -1,81 +1,65 @@
 package org.example;
 
-import java.util.LinkedList;
 
-public class HashTable<Key, Value> {
-    private static class Node<Key, Value> {
-        Key key;
-        Value value;
-        Node<Key, Value> next;
+public class HashTable<K, V> {
+    private final static int DEFAULT_CAPACITY = 16;
+    private final Node<K, V>[] table;
 
-        Node(Key key, Value value) {
+    @SuppressWarnings("unchecked")
+    public HashTable() {
+        table = new Node[DEFAULT_CAPACITY];
+    }
+
+    private static class Node<K, V> {
+        final K key;
+        V value;
+        Node<K, V> next;
+
+        Node(K key, V value) {
             this.key = key;
             this.value = value;
         }
     }
 
-    private final int size;
-    private final LinkedList<Node<Key, Value>>[] table;
-
-    public HashTable(int size) {
-        this.size = size;
-        this.table = new LinkedList[size];
-        for (int i = 0; i < table.length; i++) {
-            table[i] = new LinkedList<>();
-        }
+    private int hash(K key) {
+        return key == null ? 0 : Math.abs(key.hashCode() % DEFAULT_CAPACITY);
     }
 
-    private int hash(Key key) {
-        return Math.abs(key.hashCode() % size);
-    }
-
-    public void put(Key key, Value value) {
+    public void put(K key, V value) {
         int index = hash(key);
-        LinkedList<Node<Key, Value>> bucket = table[index];
-        for (Node<Key, Value> node : bucket) {
-            if (key.equals(node.key)) {
-                node.value = value;
-                return;
+        Node<K, V> newNode = new Node<>(key, value);
+        if (table[index] == null) {
+            table[index] = newNode;
+        } else {
+            Node<K, V> current = table[index];
+            Node<K, V> prev = null;
+            while (current != null) {
+                if (current.key.equals(key)) {
+                    current.value = value;
+                    return;
+                }
+                prev = current;
+                current = current.next;
             }
+            assert prev != null;
+            prev.next = newNode;
         }
-        bucket.add(new Node<>(key, value));
     }
 
-    public Value get(Key key) {
-        int index = hash(key);
-        LinkedList<Node<Key, Value>> bucket = table[index];
-        for (Node<Key, Value> node : bucket) {
-            if (key.equals(node.key)) {
-                return node.value;
-            }
-        }
+    public V get(K key) {
         return null;
     }
 
-    public boolean remove(Key key) {
-        int index = hash(key);
-        LinkedList<Node<Key, Value>> bucket = table[index];
-        for (Node<Key, Value> node : bucket) {
-            if (key.equals(node.key)) {
-                bucket.remove(node);
-                return true;
-            }
-        }
-        return false;
+    @Override
+    public String toString() {
+        return "HashTable{}";
     }
 
     public static void main(String[] args) {
-        HashTable<String, Integer> ht = new HashTable<>(10);
+        HashTable<String, Integer> ht = new HashTable<>();
         ht.put("one", 1);
         ht.put("two", 2);
         ht.put("three", 3);
-
-        System.out.println(ht.get("one"));
-        System.out.println(ht.get("two"));
-        System.out.println(ht.get("three"));
-
-        ht.remove("two");
-        System.out.println(ht.get("two"));
+        System.out.println(ht.toString());
     }
 }
-
