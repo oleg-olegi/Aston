@@ -47,19 +47,37 @@ public class HashTable<K, V> {
     }
 
     public V get(K key) {
+        int index = hash(key);
+        Node<K, V> current = table[index];
+        while (current != null) {
+            if (current.key.equals(key)) {
+                return current.value;
+            }
+            current = current.next;
+        }
         return null;
+    }
+
+    public void remove(K key) {
+        int index = hash(key);
+        Node<K, V> current = table[index];
+        Node<K, V> prev = null;
+        while (current != null) {
+            if (current.key.equals(key)) {
+                if (prev == null) {
+                    table[index] = current.next;
+                } else {
+                    prev.next = current.next;
+                }
+                return;
+            }
+            prev = current;
+            current = current.next;
+        }
     }
 
     @Override
     public String toString() {
         return "HashTable{}";
-    }
-
-    public static void main(String[] args) {
-        HashTable<String, Integer> ht = new HashTable<>();
-        ht.put("one", 1);
-        ht.put("two", 2);
-        ht.put("three", 3);
-        System.out.println(ht.toString());
     }
 }

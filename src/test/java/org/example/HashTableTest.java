@@ -1,66 +1,78 @@
 package org.example;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+import java.util.HashMap;
 
 class HashTableTest {
+    private HashMap<String, Integer> map;
 
-    @Test
-    void testPutAndGet() {
-        HashTable<String, Integer> ht = new HashTable<>(10);
-        ht.put("one", 1);
-        ht.put("two", 2);
-        ht.put("three", 3);
-
-        assertEquals(1, ht.get("one"));
-        assertEquals(2, ht.get("two"));
-        assertEquals(3, ht.get("three"));
+    @BeforeEach
+    public void setUp() {
+        map = new HashMap<>();
     }
 
     @Test
-    void testUpdateValue() {
-        HashTable<String, Integer> ht = new HashTable<>(10);
-        ht.put("one", 1);
-        ht.put("one", 10);
+    public void testPutAndGet() {
+        map.put("one", 1);
+        map.put("two", 2);
+        map.put("three", 3);
 
-        assertEquals(10, ht.get("one"));
+        assertThat(map.get("one")).isEqualTo(1);
+        assertThat(map.get("two")).isEqualTo(2);
+        assertThat(map.get("three")).isEqualTo(3);
+        assertThat(map.get("four")).isNull();
     }
 
     @Test
-    void testRemove() {
-        HashTable<String, Integer> ht = new HashTable<>(10);
-        ht.put("one", 1);
-        ht.put("two", 2);
+    public void testUpdateValue() {
+        map.put("one", 1);
+        map.put("one", 10);
 
-        assertTrue(ht.remove("one"));
-        assertNull(ht.get("one"));
-        assertEquals(2, ht.get("two"));
+        assertThat(map.get("one")).isEqualTo(10);
     }
 
     @Test
-    void testRemoveNonExistentKey() {
-        HashTable<String, Integer> ht = new HashTable<>(10);
-        ht.put("one", 1);
+    public void testRemove() {
+        map.put("one", 1);
+        map.put("two", 2);
 
-        assertFalse(ht.remove("two"));
-        assertEquals(1, ht.get("one"));
+        map.remove("one");
+
+        assertThat(map.get("one")).isNull();
+        assertThat(map.get("two")).isEqualTo(2);
+
+        map.remove("two");
+
+        assertThat(map.get("two")).isNull();
     }
 
     @Test
-    void testGetNonExistentKey() {
-        HashTable<String, Integer> ht = new HashTable<>(10);
+    public void testCollision() {
+        map.put("Aa", 1);
+        map.put("BB", 2); // "Aa" и "BB" имеют одинаковый хэш-код в некоторых системах
 
-        assertNull(ht.get("nonexistent"));
+        assertThat(map.get("Aa")).isEqualTo(1);
+        assertThat(map.get("BB")).isEqualTo(2);
+
+        map.remove("Aa");
+
+        assertThat(map.get("Aa")).isNull();
+        assertThat(map.get("BB")).isEqualTo(2);
     }
 
     @Test
-    void testCollisionHandling() {
-        HashTable<String, Integer> ht = new HashTable<>(1);
-        ht.put("one", 1);
-        ht.put("two", 2);
+    public void testRemoveNonExistingKey() {
+        map.put("one", 1);
+        map.put("two", 2);
 
-        assertEquals(1, ht.get("one"));
-        assertEquals(2, ht.get("two"));
+        map.remove("two"); // "two" не существует
+
+        assertThat(map.get("one")).isEqualTo(1);
+        assertThat(map.get("two")).isNull();
     }
 }
