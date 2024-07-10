@@ -1,19 +1,19 @@
 package org.example;
 
-
 /**
  * Кастомная хеш-таблица с использованием цепочек для разрешения коллизий.
  *
- * @param <K> тип ключей, поддерживаемых хеш-таблицей
+ * @param <K> тип ключей, поддерживаемых этой хеш-таблицей
  * @param <V> тип значений, сопоставленных с ключами
  * @author oleg shinkevich
  */
 public class HashTable<K, V> {
-    private final static int DEFAULT_CAPACITY = 16;
-    private final Node<K, V>[] table;
+    private static final int DEFAULT_CAPACITY = 16;
+    private static final float LOAD_FACTOR = 0.75f;
+    private Node<K, V>[] table;
+    private int size;
 
     /**
-     * Конструктор объекта таблицы
      * Создает новую, пустую хеш-таблицу с начальной емкостью по умолчанию (16).
      */
     @SuppressWarnings("unchecked")
@@ -33,7 +33,6 @@ public class HashTable<K, V> {
         Node<K, V> next;
 
         /**
-         * Конструктор объекта узла
          * Создает новый узел с указанным ключом и значением.
          *
          * @param key   ключ
@@ -52,7 +51,7 @@ public class HashTable<K, V> {
      * @return хеш-значение
      */
     private int hash(K key) {
-        return key == null ? 0 : Math.abs(key.hashCode() % DEFAULT_CAPACITY);
+        return key == null ? 0 : Math.abs(key.hashCode() % table.length);
     }
 
     /**
@@ -63,6 +62,10 @@ public class HashTable<K, V> {
      * @param value значение, которое должно быть связано с указанным ключом
      */
     public void put(K key, V value) {
+        if (size >= table.length * LOAD_FACTOR) {
+            resize();
+        }
+
         int index = hash(key);
         Node<K, V> newNode = new Node<>(key, value);
         if (table[index] == null) {
@@ -81,6 +84,7 @@ public class HashTable<K, V> {
             assert prev != null;
             prev.next = newNode;
         }
+        size++;
     }
 
     /**
@@ -119,6 +123,7 @@ public class HashTable<K, V> {
                 } else {
                     prev.next = current.next;
                 }
+                size--;
                 return;
             }
             prev = current;
@@ -151,5 +156,22 @@ public class HashTable<K, V> {
 
         sb.append("}");
         return sb.toString();
+    }
+
+    /**
+     * Увеличивает размер хеш-таблицы, удваивая её текущую емкость и повторно хешируя все элементы.
+     */
+    @SuppressWarnings("unchecked")
+    private void resize() {
+        Node<K, V>[] oldTable = table;
+        table = new Node[oldTable.length * 2];
+        size = 0;
+
+        for (Node<K, V> node : oldTable) {
+            while (node != null) {
+                put(node.key, node.value);
+                node = node.next;
+            }
+        }
     }
 }

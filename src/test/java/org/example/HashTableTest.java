@@ -3,76 +3,71 @@ package org.example;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-
-import java.util.HashMap;
-
-class HashTableTest {
-    private HashMap<String, Integer> map;
+public class HashTableTest {
+    private HashTable<String, Integer> hashTable;
 
     @BeforeEach
     public void setUp() {
-        map = new HashMap<>();
+        hashTable = new HashTable<>();
     }
 
     @Test
     public void testPutAndGet() {
-        map.put("one", 1);
-        map.put("two", 2);
-        map.put("three", 3);
+        hashTable.put("one", 1);
+        hashTable.put("two", 2);
+        hashTable.put("three", 3);
 
-        assertThat(map.get("one")).isEqualTo(1);
-        assertThat(map.get("two")).isEqualTo(2);
-        assertThat(map.get("three")).isEqualTo(3);
-        assertThat(map.get("four")).isNull();
+        assertEquals(1, hashTable.get("one"));
+        assertEquals(2, hashTable.get("two"));
+        assertEquals(3, hashTable.get("three"));
+        assertNull(hashTable.get("four"));
     }
 
     @Test
     public void testUpdateValue() {
-        map.put("one", 1);
-        map.put("one", 10);
+        hashTable.put("one", 1);
+        hashTable.put("one", 11);
 
-        assertThat(map.get("one")).isEqualTo(10);
+        assertEquals(11, hashTable.get("one"));
     }
 
     @Test
     public void testRemove() {
-        map.put("one", 1);
-        map.put("two", 2);
+        hashTable.put("one", 1);
+        hashTable.put("two", 2);
 
-        map.remove("one");
+        hashTable.remove("one");
+        assertNull(hashTable.get("one"));
+        assertEquals(2, hashTable.get("two"));
 
-        assertThat(map.get("one")).isNull();
-        assertThat(map.get("two")).isEqualTo(2);
-
-        map.remove("two");
-
-        assertThat(map.get("two")).isNull();
+        hashTable.remove("two");
+        assertNull(hashTable.get("two"));
     }
 
     @Test
-    public void testCollision() {
-        map.put("Aa", 1);
-        map.put("BB", 2); // "Aa" и "BB" имеют одинаковый хэш-код в некоторых системах
+    public void testResize() {
+        for (int i = 1; i <= 12; i++) {
+            hashTable.put("key" + i, i);
+        }
 
-        assertThat(map.get("Aa")).isEqualTo(1);
-        assertThat(map.get("BB")).isEqualTo(2);
+        assertEquals(1, hashTable.get("key1"));
+        assertEquals(12, hashTable.get("key12"));
 
-        map.remove("Aa");
-
-        assertThat(map.get("Aa")).isNull();
-        assertThat(map.get("BB")).isEqualTo(2);
+        // Проверка, что все элементы на месте после изменения размера
+        for (int i = 1; i <= 12; i++) {
+            assertEquals(i, hashTable.get("key" + i));
+        }
     }
 
     @Test
-    public void testRemoveNonExistingKey() {
-        map.put("one", 1);
-        map.put("two", 2);
+    public void testToString() {
+        hashTable.put("one", 1);
+        hashTable.put("two", 2);
+        hashTable.put("three", 3);
 
-        map.remove("two"); // "two" не существует
-
-        assertThat(map.get("one")).isEqualTo(1);
-        assertThat(map.get("two")).isNull();
+        String expected = "{one=1, two=2, three=3}";
+        assertEquals(expected, hashTable.toString());
     }
 }
