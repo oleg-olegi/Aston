@@ -3,6 +3,8 @@ package org.example;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class HashTableTest {
@@ -59,6 +61,16 @@ public class HashTableTest {
         for (int i = 1; i <= 12; i++) {
             assertEquals(i, hashTable.get("key" + i));
         }
+    }
+
+    @Test
+    public void testResizeOnLargeVolume() {
+        int initialCapacity = 16;
+        int elementsToAdd = (int) (initialCapacity * 0.75) + 1;
+
+        IntStream.range(0, elementsToAdd).forEach(i -> hashTable.put("key" + i, i));
+        IntStream.range(0, elementsToAdd).forEach(i -> assertEquals(i, hashTable.get("key" + i)));
+        assertTrue(hashTable.getSize() > initialCapacity * 0.75);
     }
 
     @Test
